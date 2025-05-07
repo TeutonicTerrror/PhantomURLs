@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phantom Archive</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gruppo&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --eerie-black: #1A1A1A;
+            --neon-blue: #426BFF;
+            --blood-red: #660000;
+            --font-primary: 'Gruppo', sans-serif;
+            --font-secondary: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--eerie-black) 0%, #0A0A0A 100%);
+            color: #c0c0c0;
+            margin: 0;
+            font-family: var(--font-primary);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff0000aa;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.2s, opacity 0.2s;
+            mix-blend-mode: difference;
+            z-index: 9999;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #1a1a1a00 0%, #1a1a1a 50%, #1a1a1a00 100%);
+            padding: 1rem 0;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .nav-link {
+            color: #c0c0c0;
+            margin: 0 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-family: var(--font-secondary);
+            text-decoration: none;
+        }
+
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 6rem;
+            padding: 2rem;
+        }
+
+        .link-card {
+            background: #00000040;
+            border: 1px solid #ff000020;
+            padding: 1rem;
+            border-radius: 5px;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .favicon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .delete-btn {
+            background: #66000060;
+            border: 1px solid #ff000040;
+            padding: 0.3rem 0.8rem;
+            margin-left: auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    
+    <nav class="nav">
+        <center>
+            <a href="index.html" class="nav-link">SHORTENER</a>
+            <a href="history.html" class="nav-link">ARCHIVE</a>
+        </center>
+    </nav>
+
+    <div class="link-grid" id="linkArchive"></div>
+
+    <script>
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = `${e.clientX -10}px`;
+            cursor.style.top = `${e.clientY -10}px`;
+        });
+        document.querySelectorAll('a, button').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.style.transform = 'scale(1.5)');
+            el.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+        });
+
+        function deleteLink(slug) {
+            localStorage.removeItem(slug);
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const archive = document.getElementById('linkArchive');
+            archive.innerHTML = '';
+            for(let i = 0; i < localStorage.length; i++) {
+                const slug = localStorage.key(i);
+                const url = localStorage.getItem(slug);
+                try {
+                    const domain = new URL(url).hostname;
+                    archive.innerHTML += `
+                        <div class="link-card">
+                            <img src="https://www.google.com/s2/favicons?domain=${domain}" class="favicon">
+                            <div style="flex-grow: 1;">
+                                <a href="${location.origin}/index.html?go=${slug}" style="color: var(--neon-blue); display: block;">${slug}</a>
+                                <p style="word-break: break-all; font-size: 0.8em; margin: 0.5rem 0;">${url}</p>
+                            </div>
+                            <button class="delete-btn" onclick="deleteLink('${slug}')">X</button>
+                        </div>
+                    `;
+                } catch(e) {}
+            }
+        }
+
+        window.onload = () => {
+            updateHistory();
+            const params = new URLSearchParams(location.search);
+            const slug = params.get('go');
+            if (slug) {
+                const original = localStorage.getItem(slug);
+                original ? location.href = original : alert('LINK TERMINATED');
+            }
+        };
+    </script>
+</body>
+</html>

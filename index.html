@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhantomNET</title>
+    <link href="https://fonts.googleapis.com/css2?family=Gruppo&family=Orbitron:wght@500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --eerie-black: #1A1A1A;
+            --blood-red: #660000;
+            --neon-blue: #426BFF;
+            --font-primary: 'Gruppo', sans-serif;
+            --font-secondary: 'Orbitron', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--eerie-black) 0%, #0A0A0A 100%);
+            color: #c0c0c0;
+            margin: 0;
+            font-family: var(--font-primary);
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        .cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff0000aa;
+            border-radius: 50%;
+            pointer-events: none;
+            transition: transform 0.2s, opacity 0.2s;
+            mix-blend-mode: difference;
+            z-index: 9999;
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #1a1a1a00 0%, #1a1a1a 50%, #1a1a1a00 100%);
+            padding: 1rem 0;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .nav-link {
+            color: #c0c0c0;
+            margin: 0 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            font-family: var(--font-secondary);
+            text-decoration: none;
+        }
+
+        .input-field {
+            background: #00000060;
+            border: 1px solid #ff000040;
+            color: #fff;
+            padding: 1rem;
+            width: 70%;
+            margin: 2rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .generate-btn {
+            background: linear-gradient(45deg, #ff000060, #33000090);
+            border: 1px solid #ff000040;
+            padding: 1rem 2rem;
+            font-family: var(--font-secondary);
+            transition: all 0.3s ease;
+            color: white;
+            cursor: pointer;
+        }
+
+        .url-container {
+            border: 1px solid var(--blood-red);
+            padding: 1rem;
+            margin: 1rem auto;
+            width: 70%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #00000060;
+        }
+
+        .copy-btn {
+            background: linear-gradient(45deg, #ff000060, #33000090);
+            border: 1px solid #ff000040;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor"></div>
+    
+    <nav class="nav">
+        <center>
+            <a href="index.html" class="nav-link">SHORTENER</a>
+            <a href="history.html" class="nav-link">ARCHIVE</a>
+        </center>
+    </nav>
+
+    <center style="padding: 6rem 2rem 2rem;">
+        <h1 style="font-family: var(--font-secondary); text-shadow: 0 0 20px var(--blood-red);">PHANTOM//NET</h1>
+        <input type="url" class="input-field" id="longUrl" placeholder="Enter target URL...">
+        <br>
+        <button class="generate-btn" onclick="shortenUrl()">ENCRYPT</button>
+        <div id="result" style="margin-top: 2rem; display: none;">
+            <div class="url-container">
+                <p style="color: var(--neon-blue); margin: 0;" id="shortUrl"></p>
+                <button class="copy-btn" onclick="copyUrl()">COPY</button>
+            </div>
+        </div>
+    </center>
+
+<script>
+        const cursor = document.querySelector('.cursor');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = `${e.clientX -10}px`;
+            cursor.style.top = `${e.clientY -10}px`;
+        });
+        document.querySelectorAll('a, button, input').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.style.transform = 'scale(1.5)');
+            el.addEventListener('mouseleave', () => cursor.style.transform = 'scale(1)');
+        });
+
+        function copyUrl() {
+            const url = document.getElementById('shortUrl').textContent;
+            navigator.clipboard.writeText(url);
+            event.target.textContent = 'COPIED!';
+            setTimeout(() => event.target.textContent = 'COPY', 1000);
+        }
+
+        function generateSlug() {
+            return Math.random().toString(36).substr(2, 6);
+        }
+
+        function shortenUrl() {
+            const longUrl = document.getElementById('longUrl').value;
+            if (!longUrl.startsWith('http')) return;
+            const slug = generateSlug();
+            localStorage.setItem(slug, longUrl);
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('shortUrl').textContent = `${location.origin}${location.pathname}?go=${slug}`;
+        }
+
+        window.onload = () => {
+            const params = new URLSearchParams(location.search);
+            const slug = params.get('go');
+            if (slug) {
+                const original = localStorage.getItem(slug);
+                original ? location.href = original : alert('LINK TERMINATED');
+            }
+        };
+    </script>
+</body>
+</html>
